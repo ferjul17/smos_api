@@ -1,0 +1,22 @@
+{
+  "name": "smos_api",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.6",
+    "@types/es6-promise": "0.0.33",
+    "@types/request-promise-native": "^1.0.10",
+    "request-debug": "^0.2.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.2"
+  },
+  "scripts": {},
+  "author": "",
+  "license": "ISC"
+}
