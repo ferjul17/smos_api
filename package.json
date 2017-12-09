@@ -1,7 +1,7 @@
 {
   "name": "smos_api",
   "version": "0.0.1",
-  "description": "",
+  "description": "Reverse engineered API for Simple Mining OS",
   "main": "index.js",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
@@ -17,6 +17,6 @@
     "typescript": "^2.6.2"
   },
   "scripts": {},
-  "author": "",
-  "license": "ISC"
+  "author": "Julien Ferrier",
+  "license": "MIT"
 }
