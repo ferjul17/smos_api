@@ -1,6 +1,6 @@
 {
   "name": "smos_api",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Reverse engineered API for Simple Mining OS",
   "main": "index.js",
   "dependencies": {
@@ -20,5 +20,9 @@
   },
   "scripts": {},
   "author": "Julien Ferrier",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ferjul17/smos_api.git"
+  }
 }
