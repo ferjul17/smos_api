@@ -76,40 +76,44 @@ export default class API {
                 try {
                     const tried: boolean = false;
                     page.on("response", async (res: Response) => {
-                        const body = await res.text();
-                        const rigs = body ? JSON.parse(body) as IGetListRigsRow[] : null;
-                        if (rigs) {
-                            resolve(rigs.map((rig: IGetListRigsRow): IRigInfo => {
-                                const {gpuCoreFrequencies, gpuMemoryFrequencies} = parseGPUCoreMemory(rig);
-                                const {temperatures, fansSpeed} = parseTemps(rig);
-                                const {hashRates, hashRate} = parseSpeed(rig);
-                                const {uptime, programStartDate, serverTime, lastSeenDate, totalRestarts} =
-                                    parseLastUpdate(rig);
-                                const {kernel, ip} = parseName(rig);
-                                return {
-                                    id: rig.id,
-                                    gpuCoreFrequencies,
-                                    gpuMemoryFrequencies,
-                                    group: rig.group,
-                                    uptime,
-                                    programStartDate,
-                                    serverTime,
-                                    lastSeenDate,
-                                    totalRestarts,
-                                    kernel,
-                                    ip,
-                                    osVersion: rig.version,
-                                    hashRates,
-                                    hashRate,
-                                    temperatures,
-                                    fansSpeed,
-                                };
-                            }));
-                        } else if (tried) {
-                            reject(new Error(`Unable to parse response: ${body}`));
-                        } else {
-                            await this.login(false);
-                            await page.reload();
+                        try {
+                            const body = await res.text();
+                            const rigs = body ? JSON.parse(body) as IGetListRigsRow[] : null;
+                            if (rigs) {
+                                resolve(rigs.map((rig: IGetListRigsRow): IRigInfo => {
+                                    const {gpuCoreFrequencies, gpuMemoryFrequencies} = parseGPUCoreMemory(rig);
+                                    const {temperatures, fansSpeed} = parseTemps(rig);
+                                    const {hashRates, hashRate} = parseSpeed(rig);
+                                    const {uptime, programStartDate, serverTime, lastSeenDate, totalRestarts} =
+                                        parseLastUpdate(rig);
+                                    const {kernel, ip} = parseName(rig);
+                                    return {
+                                        id: rig.id,
+                                        gpuCoreFrequencies,
+                                        gpuMemoryFrequencies,
+                                        group: rig.group,
+                                        uptime,
+                                        programStartDate,
+                                        serverTime,
+                                        lastSeenDate,
+                                        totalRestarts,
+                                        kernel,
+                                        ip,
+                                        osVersion: rig.version,
+                                        hashRates,
+                                        hashRate,
+                                        temperatures,
+                                        fansSpeed,
+                                    };
+                                }));
+                            } else if (tried) {
+                                reject(new Error(`Unable to parse response: ${body}`));
+                            } else {
+                                await this.login(false);
+                                await page.reload();
+                            }
+                        } catch (e) {
+                            this.closePageAndReject(page, reject, e);
                         }
                     });
                     page.goto(RIGS_LIST_PAGE);
