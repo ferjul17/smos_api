@@ -13,7 +13,7 @@ export default class API {
     private readonly email: string;
     private readonly password: string;
 
-    private browser: Browser;
+    private browser: Browser | undefined;
 
     public constructor(email: string, password: string) {
         this.email = email;
@@ -23,8 +23,9 @@ export default class API {
     /**
      * @returns {Promise<void>}
      */
-    public login(): Promise<void> {
-        return new Promise<void>(async (resolve, reject) => {
+    public login(closeSession: boolean = true): Promise<void> {
+        const closeBrowser = closeSession ? this.closeBrowser : undefined;
+        return (new Promise<void>(async (resolve, reject) => {
             try {
                 const page = await (await this.getBrowser()).newPage();
                 try {
@@ -60,16 +61,16 @@ export default class API {
             } catch (e) {
                 reject(e);
             }
-        });
+        })).then(closeBrowser, closeBrowser);
 
     }
 
     /**
      * @returns {Promise<IRigInfo[]>}
      */
-    public getListRigs(): Promise<IRigInfo[]> {
-
-        return new Promise<IRigInfo[]>(async (resolve, reject) => {
+    public getListRigs(closeSession: boolean = true): Promise<IRigInfo[]> {
+        const closeBrowser = closeSession ? (r: IRigInfo[]) => this.closeBrowser().then(() => r) : undefined;
+        return (new Promise<IRigInfo[]>(async (resolve, reject) => {
             try {
                 const page = await (await this.getBrowser()).newPage();
                 try {
@@ -107,7 +108,7 @@ export default class API {
                         } else if (tried) {
                             reject(new Error(`Unable to parse response: ${body}`));
                         } else {
-                            await this.login();
+                            await this.login(false);
                             await page.reload();
                         }
                     });
@@ -118,7 +119,7 @@ export default class API {
             } catch (e) {
                 reject(e);
             }
-        });
+        })).then(closeBrowser, closeBrowser);
 
     }
 
@@ -160,12 +161,15 @@ export default class API {
                 .then((b: Browser) => this.browser = b);
     }
 
+    private async closeBrowser(): Promise<void> {
+        return (await this.getBrowser()).close();
+    }
+
     private closePageAndReject(page: Page, reject: (e: Error) => void, e: Error) {
-        page.close().catch(() => {
+        const cb = () => {
             reject(e);
-        }).then(() => {
-            reject(e);
-        });
+        };
+        page.close().then(cb, cb);
     }
 
 }
