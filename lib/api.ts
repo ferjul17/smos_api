@@ -1,12 +1,22 @@
 "use strict";
 
-import {Browser, launch, Page, Response} from "puppeteer";
+import {access, mkdir, readFile, writeFile} from "fs";
+import {dirname} from "path";
+import {Browser, Cookie, launch, Page, Response, SetCookie} from "puppeteer";
+import {promisify} from "util";
 import {parseGPUCoreMemory, parseLastUpdate, parseName, parseSpeed, parseTemps} from "./helper";
 import {IGetListRigsRow, IRigInfo} from "./interfaces";
+
+const COOKIE_PATH = __dirname + "/../tmp/.cookies.json";
 
 const LOGIN_PAGE = "https://simplemining.net/account/login";
 const RIGS_LIST_PAGE = "https://simplemining.net/json/getListRigs";
 const TESSERACT_JS = "https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js";
+
+const readFileAsync = promisify(readFile);
+const writeFileAsync = promisify(writeFile);
+const mkdirAsync = promisify(mkdir);
+const accessAsync = promisify(access);
 
 export default class API {
 
@@ -27,7 +37,7 @@ export default class API {
         const closeBrowser = closeSession ? this.closeBrowser : undefined;
         return (new Promise<void>(async (resolve, reject) => {
             try {
-                const page = await (await this.getBrowser()).newPage();
+                const page = await this.getPage();
                 try {
                     let retryCount = 0;
                     await page.goto(LOGIN_PAGE);
@@ -43,6 +53,7 @@ export default class API {
                                         : "");
                             });
                             if (/Logged success/.test(error)) {
+                                await this.saveCookie(page);
                                 await page.close();
                                 resolve();
                             } else if (/Invalid captcha/.test(error) && retryCount++ < 3) {
@@ -72,7 +83,7 @@ export default class API {
         const closeBrowser = closeSession ? (r: IRigInfo[]) => this.closeBrowser().then(() => r) : undefined;
         return (new Promise<IRigInfo[]>(async (resolve, reject) => {
             try {
-                const page = await (await this.getBrowser()).newPage();
+                const page = await this.getPage();
                 try {
                     const tried: boolean = false;
                     page.on("response", async (res: Response) => {
@@ -165,15 +176,74 @@ export default class API {
                 .then((b: Browser) => this.browser = b);
     }
 
+    /**
+     * @param {Browser} browser
+     * @returns {Promise<Page>}
+     */
+    private getPage(browser?: Browser): Promise<Page> {
+        return Promise.all([
+            (browser ? Promise.resolve(browser) as Promise<Browser> : this.getBrowser())
+                .then((b: Browser) => b.newPage()),
+            this.getCookie(),
+        ]).then((results: Array<(Page | SetCookie[])>) => {
+            const page = results[0] as Page;
+            const cookies = results[1] as SetCookie[];
+            debugger;
+            if (cookies.length) {
+                return page.setCookie.apply(page, cookies).then(() => page);
+            }
+            return page as Page;
+        });
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
     private async closeBrowser(): Promise<void> {
         return (await this.getBrowser()).close();
     }
 
+    /**
+     * @param {Page} page
+     * @param {(e: Error) => void} reject
+     * @param {Error} e
+     */
     private closePageAndReject(page: Page, reject: (e: Error) => void, e: Error) {
         const cb = () => {
             reject(e);
         };
         page.close().then(cb, cb);
+    }
+
+    /**
+     * @param {Page} page
+     * @returns {Promise<void>}
+     */
+    private saveCookie(page: Page): Promise<void> {
+        return page.cookies().then((cookies: Cookie[]) => {
+            const cookieDir = dirname(COOKIE_PATH);
+            const cookieStr = JSON.stringify(cookies);
+            const writeJarPromiseFn = () => writeFileAsync(COOKIE_PATH, cookieStr);
+            const mkdirPromiseFn = () => mkdirAsync(cookieDir).then(writeJarPromiseFn);
+            return accessAsync(cookieDir).then(writeJarPromiseFn, mkdirPromiseFn);
+        });
+    }
+
+    /**
+     * @returns {Promise<SetCookie[]>}
+     */
+    private getCookie(): Promise<SetCookie[]> {
+        return new Promise((resolve) => {
+            readFileAsync(COOKIE_PATH).then((str: Buffer | string) => {
+                try {
+                    resolve(JSON.parse(str.toString()) as SetCookie[]);
+                } catch (e) {
+                    resolve([]);
+                }
+            }, () => {
+                resolve([]);
+            });
+        });
     }
 
 }
