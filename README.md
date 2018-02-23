@@ -31,7 +31,7 @@ api.getListRigs().then(function (rigs) {
 
 and you get that:
 
-```json
+```
 [ { id: '5964356',
     gpuCoreFrequencies: [ 1145, 1145, 1145, 1145, 1167, 1145 ],
     gpuMemoryFrequencies: [ 2100, 2100, 2100, 2100, 2100, 2000 ],
