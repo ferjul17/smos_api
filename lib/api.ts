@@ -233,8 +233,7 @@ export default class API {
                     // Ignore error
                 }
                 if (!(json instanceof Array)) {
-                    return Promise.all([this.deleteSavedCookies(), this.login()])
-                        .then(([, theJar]): CookieJar => theJar);
+                    return this.deleteSavedCookies().then(this.login.bind(this) as ((_: void) => Promise<CookieJar>));
                 }
                 const jar = rp.jar();
                 json.forEach((cookieJSON: object) => {
