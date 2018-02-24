@@ -46,9 +46,9 @@ export default class API {
         let retryCount = 0;
         const callListRigs = (): Promise<IGetListRigsRow[]> =>
             this.getJar().then((jar: CookieJar): RequestPromise => rp({
+                jar,
                 method: "GET",
                 uri: RIGS_LIST_PAGE,
-                jar,
             })).then((body: string) => body === ""
                 ? this.deleteSavedCookies().then(() => retryCount++ === 3
                     ? Promise.reject(new Error("Unable to get rigs list"))
@@ -63,22 +63,22 @@ export default class API {
                 const {uptime, programStartDate, serverTime, lastSeenDate, totalRestarts} = parseLastUpdate(rig);
                 const {kernel, ip} = parseName(rig);
                 return {
-                    id: rig.id,
+                    fansSpeed,
                     gpuCoreFrequencies,
                     gpuMemoryFrequencies,
                     group: rig.group,
-                    uptime,
+                    hashRate,
+                    hashRates,
+                    id: rig.id,
+                    ip,
+                    kernel,
+                    lastSeenDate,
+                    osVersion: rig.version,
                     programStartDate,
                     serverTime,
-                    lastSeenDate,
-                    totalRestarts,
-                    kernel,
-                    ip,
-                    osVersion: rig.version,
-                    hashRates,
-                    hashRate,
                     temperatures,
-                    fansSpeed,
+                    totalRestarts,
+                    uptime,
                 };
             });
         });
@@ -166,12 +166,7 @@ export default class API {
     private getBrowser(): Promise<Browser> {
         return this.browser
             ? Promise.resolve(this.browser)
-            //*
-            : launch()
-            /*/
-            : launch({headless: false, devtools: true})
-            //*/
-                .then((b: Browser) => this.browser = b);
+            : launch().then((b: Browser) => this.browser = b);
     }
 
     /**
@@ -199,13 +194,13 @@ export default class API {
      */
     private convertPuppeteerCookiesToToughCookies(cookies: Cookie[]): ToughCookie.Cookie[] {
         return cookies.map((cookie: Cookie): ToughCookie.Cookie => new ToughCookie.Cookie({
-                key: cookie.name,
-                value: cookie.value,
-                expires: new Date(cookie.expires * 1000),
                 domain: cookie.domain,
+                expires: new Date(cookie.expires * 1000),
+                httpOnly: cookie.httpOnly,
+                key: cookie.name,
                 path: cookie.path,
                 secure: cookie.secure,
-                httpOnly: cookie.httpOnly,
+                value: cookie.value,
             }),
         );
     }

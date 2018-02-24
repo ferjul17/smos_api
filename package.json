@@ -4,7 +4,7 @@
   "description": "Reverse engineered API for Simple Mining OS",
   "main": "index.js",
   "dependencies": {
-    "puppeteer": "^1.1.0",
+    "puppeteer": "^1.1.1",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "tough-cookie": "^2.3.3"
@@ -23,12 +23,16 @@
     "typescript": "^2.7.2"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "lint": "tslint 'lib/**/*.ts'"
   },
   "author": "Julien Ferrier",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/ferjul17/smos_api.git"
+  },
+  "bugs": {
+    "url": "http://github.com/ferjul17/smos_api/issues"
   }
 }

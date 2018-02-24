@@ -30,7 +30,8 @@ function parseSpeed(rig: IGetListRigsRow): { hashRates: number[], hashRate: numb
     return {hashRates, hashRate};
 }
 
-function parseLastUpdate(rig: IGetListRigsRow): { uptime: string, programStartDate: Date, serverTime: Date, lastSeenDate: Date, totalRestarts: number } {
+function parseLastUpdate(rig: IGetListRigsRow)
+    : { uptime: string, programStartDate: Date, serverTime: Date, lastSeenDate: Date, totalRestarts: number } {
     const rawUptime = /Rig Uptime: up([^<]+)/.exec(rig.lastUpdate);
     const uptime = rawUptime ? rawUptime[1].trim() : "";
 
