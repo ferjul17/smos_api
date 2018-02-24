@@ -3,7 +3,7 @@
 import {access, mkdir, readFile, unlink, writeFile} from "fs";
 import {dirname} from "path";
 import {Browser, Cookie, launch, Page} from "puppeteer";
-import {CookieJar} from "request";
+import {CookieJar, CoreOptions, UriOptions} from "request";
 import * as rp from "request-promise-native";
 import {RequestPromise} from "request-promise-native";
 import * as ToughCookie from "tough-cookie";
@@ -16,6 +16,7 @@ const COOKIE_PATH = __dirname + "/../tmp/.cookies.json";
 const HOST = "https://simplemining.net/";
 const LOGIN_PAGE = `${HOST}account/login`;
 const RIGS_LIST_PAGE = `${HOST}json/getListRigs`;
+const REBOOT_RIG_PAGE = `${HOST}json/rebootRig`;
 
 const TESSERACT_JS = "https://cdn.rawgit.com/naptha/tesseract.js/1.0.10/dist/tesseract.js";
 
@@ -42,20 +43,7 @@ export default class API {
      * @returns {Promise<IRigInfo[]>}
      */
     public getListRigs(): Promise<IRigInfo[]> {
-
-        let retryCount = 0;
-        const callListRigs = (): Promise<IGetListRigsRow[]> =>
-            this.getJar().then((jar: CookieJar): RequestPromise => rp({
-                jar,
-                method: "GET",
-                uri: RIGS_LIST_PAGE,
-            })).then((body: string) => body === ""
-                ? this.deleteSavedCookies().then(() => retryCount++ === 3
-                    ? Promise.reject(new Error("Unable to get rigs list"))
-                    : callListRigs())
-                : JSON.parse(body));
-
-        return callListRigs().then((rigs: IGetListRigsRow[]): IRigInfo[] => {
+        return this.sendRequest({method: "GET", uri: RIGS_LIST_PAGE}).then((rigs: IGetListRigsRow[]): IRigInfo[] => {
             return rigs.map((rig: IGetListRigsRow): IRigInfo => {
                 const {gpuCoreFrequencies, gpuMemoryFrequencies} = parseGPUCoreMemory(rig);
                 const {temperatures, fansSpeed} = parseTemps(rig);
@@ -82,6 +70,33 @@ export default class API {
                 };
             });
         });
+    }
+
+    /**
+     * @param {string} id
+     * @returns {Promise<void>}
+     */
+    public rebootRig(id: string): Promise<void> {
+        return this.sendRequest({method: "POST", uri: REBOOT_RIG_PAGE, form: {id}}).then(() => {
+            // return void
+        });
+    }
+
+    /**
+     * @param {request.CoreOptions & request.UriOptions} rpParams
+     * @returns {Promise<any>}
+     */
+    private sendRequest(rpParams: CoreOptions & UriOptions): Promise<any> {
+        let retryCount = 0;
+        const caller = (): Promise<any> =>
+            this.getJar()
+                .then((jar: CookieJar): RequestPromise => rp({jar, ...rpParams}))
+                .then((body: string) => body === ""
+                    ? this.deleteSavedCookies().then(() => retryCount++ === 3
+                        ? Promise.reject(new Error("Unable to get rigs list"))
+                        : caller())
+                    : JSON.parse(body));
+        return caller();
     }
 
     /**
