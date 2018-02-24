@@ -3,9 +3,10 @@ import {readFileSync} from "fs";
 import {parseGPUCoreMemory, parseLastUpdate, parseName, parseSpeed, parseTemps} from "../lib/helper";
 import {IGetListRigsRow} from "../lib/interfaces";
 
+const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/getListRigs.txt").toString())[0];
+
 describe("parseGPUCoreMemory", () => {
     it("should parse GPU core frequencies", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseGPUCoreMemory(rig) as any;
 
         assert(result instanceof Object);
@@ -17,7 +18,6 @@ describe("parseGPUCoreMemory", () => {
         assert([1145, 1145, 1145, 1145, 1167, 1145].every((f, i) => f === gpuCoreFrequencies[i]));
     });
     it("should parse GPU memory frequencies", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseGPUCoreMemory(rig) as any;
 
         assert(result instanceof Object);
@@ -32,7 +32,6 @@ describe("parseGPUCoreMemory", () => {
 
 describe("parseTemps", () => {
     it("should parse GPU temperatures", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseTemps(rig) as any;
 
         assert(result instanceof Object);
@@ -44,7 +43,6 @@ describe("parseTemps", () => {
         assert([60, 61, 61, 60, 66, 55].every((f, i) => f === temperatures[i]));
     });
     it("should parse GPU fan speeds", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseTemps(rig) as any;
 
         assert(result instanceof Object);
@@ -59,7 +57,6 @@ describe("parseTemps", () => {
 
 describe("parseSpeed", () => {
     it("should parse GPU hash rates", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseSpeed(rig) as any;
 
         assert(result instanceof Object);
@@ -71,7 +68,6 @@ describe("parseSpeed", () => {
         assert([29.08, 29.09, 29.04, 29.08, 28.99, 22.23].every((f, i) => f === hashRates[i]));
     });
     it("should parse total GPU hash rate", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseSpeed(rig) as any;
 
         assert(result instanceof Object);
@@ -86,7 +82,6 @@ describe("parseSpeed", () => {
 
 describe("parseLastUpdate", () => {
     it("should parse uptime", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseLastUpdate(rig) as any;
 
         assert(result instanceof Object);
@@ -98,7 +93,6 @@ describe("parseLastUpdate", () => {
         assert.equal(uptime, "6 days, 6 hours, 53 minutes");
     });
     it("should parse mining program start date", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseLastUpdate(rig) as any;
 
         assert(result instanceof Object);
@@ -110,7 +104,6 @@ describe("parseLastUpdate", () => {
         assert.equal(programStartDate.getTime(), 1518336406000);
     });
     it("should parse server time", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseLastUpdate(rig) as any;
 
         assert(result instanceof Object);
@@ -122,7 +115,6 @@ describe("parseLastUpdate", () => {
         assert.equal(serverTime.getTime(), 1518879584000);
     });
     it("should parse last seen date", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseLastUpdate(rig) as any;
 
         assert(result instanceof Object);
@@ -134,7 +126,6 @@ describe("parseLastUpdate", () => {
         assert.equal(lastSeenDate.getTime(), 1518879564000);
     });
     it("should parse total of restart", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseLastUpdate(rig) as any;
 
         assert(result instanceof Object);
@@ -149,7 +140,6 @@ describe("parseLastUpdate", () => {
 
 describe("parseName", () => {
     it("should parse kernel", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseName(rig) as any;
 
         assert(result instanceof Object);
@@ -161,7 +151,6 @@ describe("parseName", () => {
         assert.equal(kernel, "4.11.0-kfd-compute-rocm-rel-1.6-148");
     });
     it("should parse ip", () => {
-        const rig: IGetListRigsRow = JSON.parse(readFileSync(__dirname + "/response.txt").toString())[0];
         const result = parseName(rig) as any;
 
         assert(result instanceof Object);
