@@ -4,7 +4,6 @@ import * as nock from "nock";
 import {dirname} from "path";
 import {default as API} from "../lib/api";
 import {IRigInfo} from "../lib/interfaces";
-import {isNull} from "util";
 
 const HOST = "https://simplemining.net";
 const RIGS_LIST_PAGE = `/json/getListRigs`;
