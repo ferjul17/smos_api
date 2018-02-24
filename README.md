@@ -1,6 +1,8 @@
 # smos_api
 Reverse engineered API for Simple Mining OS
 
+[![Build Status](https://api.travis-ci.org/ferjul17/smos_api.svg?branch=master)](https://travis-ci.org/ferjul17/smos_api)
+
 ## Getting Started
 
 To use this library in your project, run:
