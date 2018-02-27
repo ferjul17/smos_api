@@ -1,3 +1,5 @@
+***SMOS changed the captcha, I cannot sign-in anymore. Sorry :/***
+
 # smos_api
 Reverse engineered API for Simple Mining OS
 
